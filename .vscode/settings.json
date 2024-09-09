@@ -1,15 +1,24 @@
 {
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "biomejs.biome",
-  "editor.codeActionsOnSave": {
-    "quickfix.biome": "explicit",
-    "source.organizeImports.biome": "explicit",
-    "source.fixAll": "explicit"
+  "files.associations": {
+    "*.jsx": "javascriptreact"
   },
-  "json.schemas": [
-    {
-      "url": "https://cdn.jsdelivr.net/npm/tsup/schema.json",
-      "fileMatch": ["package.json", "tsup.config.json"]
-    }
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": true,
+  "editor.formatOnSave": true,
+  "eslint.alwaysShowStatus": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "cSpell.words": [
+    "Comming",
+    "eddsa",
+    "Eddsad",
+    "formated",
+    "gcse",
+    "holesky",
+    "Offcanvas",
+    "solana"
   ]
 }

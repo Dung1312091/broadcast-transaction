@@ -1,19 +1,65 @@
-import { env } from "@/common/utils/envConfig";
-import { app, logger } from "@/server";
+import cors from "cors";
+import express, { type Express } from "express";
+import bodyParser from "body-parser";
+import { SolRequest, TonRequest } from "./blockchains/type";
+import { Cell } from "@ton/core";
+import { TonWallet } from "./blockchains/ton/wallet";
+import { SolWallet } from "./blockchains/sol/wallet";
+import { decodeHex } from "./utils";
 
-const server = app.listen(env.PORT, () => {
-  const { NODE_ENV, HOST, PORT } = env;
-  logger.info(`Server (${NODE_ENV}) running on port http://${HOST}:${PORT}`);
+const PORT = 3002;
+const app: Express = express();
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+app.get("/", (req, res) => {
+  res.send("POC Broadcast Transaction");
+});
+app.post("/ton/broadcast", async (req, res) => {
+  const data = req.body as TonRequest;
+  try {
+    const transactionBuffer = Buffer.from(data.rawTransaction, "base64");
+    const cells = Cell.fromBoc(transactionBuffer);
+    const signedCell = cells[0];
+    const { contract: contract } = await TonWallet.create(
+      "mainnet",
+      data.publicKey
+    );
+    const rs = await contract.send(signedCell);
+    res.status(200).json({
+      status: "success",
+      data: rs,
+    });
+  } catch (error: any) {
+    console.error("ton/broadcast error:", error);
+    res.status(500).json(error.message);
+  }
 });
 
-const onCloseSignal = () => {
-  logger.info("sigint received, shutting down");
-  server.close(() => {
-    logger.info("server closed");
-    process.exit();
-  });
-  setTimeout(() => process.exit(1), 10000).unref(); // Force shutdown after 10s
-};
+app.post("/sol/broadcast", async (req, res) => {
+  const data = req.body as SolRequest;
+  try {
+    const { connection } = await SolWallet.init(
+      "mainnet-beta",
+      data.walletAddress,
+      {
+        commitment: "confirmed",
+      }
+    );
+    const txHash = await connection.sendRawTransaction(
+      decodeHex(data.rawTransaction)
+    );
+    res.status(200).json({
+      status: "success",
+      txHash: txHash,
+    });
+  } catch (error: any) {
+    console.error("sol/broadcast error:", error);
+    res.status(500).json(error.message);
+  }
+});
 
-process.on("SIGINT", onCloseSignal);
-process.on("SIGTERM", onCloseSignal);
+app.listen(PORT, () => {
+  console.log("app running on port", PORT);
+});
