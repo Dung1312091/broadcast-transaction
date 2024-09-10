@@ -1,8 +1,8 @@
 export type TonRequest = {
   /**
-   * The raw transaction as boc base64
+   * The signed raw transaction as boc base64
    */
-  rawTransaction: string;
+  signedRawTransaction: string;
   /**
    * Wallet public key
    */
@@ -11,11 +11,11 @@ export type TonRequest = {
 
 export type SolRequest = {
   /**
-   * The raw transaction
+   * The signed raw transaction
    */
-  rawTransaction: string;
+  signedRawTransaction: string;
   /**
-   * User solana wallet
+   * Wallet public key
    */
-  walletAddress: string;
+  publicKey: string;
 };

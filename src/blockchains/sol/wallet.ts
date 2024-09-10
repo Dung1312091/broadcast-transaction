@@ -13,10 +13,10 @@ const RPC = {
 export class SolWallet {
   static async init(
     network: "devnet" | "testnet" | "mainnet-beta",
-    walletAddress: string,
+    publicKey: string,
     commitmentOrConfig: ConnectionConfig
   ) {
-    const fromPubKey = new PublicKey(walletAddress);
+    const fromPubKey = new PublicKey(publicKey);
     const rpcUrl =
       network === "mainnet-beta" ? RPC.https : clusterApiUrl(network);
     const wssUrl =

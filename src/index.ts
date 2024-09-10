@@ -1,8 +1,8 @@
 import cors from "cors";
 import express, { type Express } from "express";
 import bodyParser from "body-parser";
-import { SolRequest, TonRequest } from "./blockchains/type";
 import { Cell } from "@ton/core";
+import { SolRequest, TonRequest } from "./blockchains/type";
 import { TonWallet } from "./blockchains/ton/wallet";
 import { SolWallet } from "./blockchains/sol/wallet";
 import { decodeHex } from "./utils";
@@ -13,19 +13,18 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-app.get("/", (req, res) => {
+
+app.get("/", (_, res) => {
   res.send("POC Broadcast Transaction");
 });
+
 app.post("/ton/broadcast", async (req, res) => {
   const data = req.body as TonRequest;
   try {
-    const transactionBuffer = Buffer.from(data.rawTransaction, "base64");
+    const transactionBuffer = Buffer.from(data.signedRawTransaction, "base64");
     const cells = Cell.fromBoc(transactionBuffer);
     const signedCell = cells[0];
-    const { contract: contract } = await TonWallet.create(
-      "mainnet",
-      data.publicKey
-    );
+    const { contract } = await TonWallet.init("mainnet", data.publicKey);
     const rs = await contract.send(signedCell);
     res.status(200).json({
       status: "success",
@@ -42,13 +41,13 @@ app.post("/sol/broadcast", async (req, res) => {
   try {
     const { connection } = await SolWallet.init(
       "mainnet-beta",
-      data.walletAddress,
+      data.publicKey,
       {
         commitment: "confirmed",
       }
     );
     const txHash = await connection.sendRawTransaction(
-      decodeHex(data.rawTransaction)
+      decodeHex(data.signedRawTransaction)
     );
     res.status(200).json({
       status: "success",

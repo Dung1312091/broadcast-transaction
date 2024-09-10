@@ -8,7 +8,7 @@ enum NetWorkEndpoint {
 }
 
 export class TonWallet {
-  static async create(network: "testnet" | "mainnet", publicKey: string) {
+  static async init(network: "testnet" | "mainnet", publicKey: string) {
     const client = new TonClient4({ endpoint: NetWorkEndpoint[network] });
     const wallet = WalletContractV4.create({
       workchain: 0,
